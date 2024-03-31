@@ -45,7 +45,7 @@ public class FieldController {
     @RequestMapping(value = "/plant", method = RequestMethod.POST)
     public @ResponseBody Plant createPlant(@RequestBody Plant plant, @RequestHeader("Time-Zone") String timezone) {
         plant.setDateTime(DateTimeUtils.justifyDateForClient(plant.getDateTime(), timezone));
-        plant.setActualTimeToGrow(plant.getDateTime().plusSeconds(plant.getTimeToGrow() * 60L));
+        plant.setActualTimeToGrow(plant.getDateTime().plusSeconds(plant.getTimeToGrow()));
 
         plantList.add(plant);
         return plant;
