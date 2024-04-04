@@ -91,4 +91,31 @@ public class FieldController {
     public @ResponseBody Account getDepot(@RequestHeader("Time-Zone") String timezone) {
         return account;
     }
+
+    @RequestMapping(value = "/fair", method = RequestMethod.POST)
+    public @ResponseBody Account sellPlants(@RequestBody Fair fair, @RequestHeader("Time-Zone") String timezone) {
+        int type = fair.getType();
+        switch (type) {
+            case 0:
+
+                if (account.getCornCount() >= fair.getPlantCount()) {
+                    account.setCornCount(account.getCornCount() - fair.getPlantCount());
+                    account.setCoins(account.getCoins() + fair.getCoin());
+                }
+                break;
+            case 1:
+                if (account.getCarrotCount() >= fair.getPlantCount()) {
+                    account.setCarrotCount(account.getCarrotCount() - fair.getPlantCount());
+                    account.setCoins(account.getCoins() + fair.getCoin());
+                }
+                break;
+            case 2:
+                if (account.getPepperCount() >= fair.getPlantCount()) {
+                    account.setPepperCount(account.getPepperCount() - fair.getPlantCount());
+                    account.setCoins(account.getCoins() + fair.getCoin());
+                }
+                break;
+        }
+        return account;
+    }
 }
