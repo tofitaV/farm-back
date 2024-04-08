@@ -14,5 +14,5 @@ public class Account {
     @Builder.Default
     int cornCount = 0;
     @Builder.Default
-    int coins = 0;
+    int coins = 100000;
 }

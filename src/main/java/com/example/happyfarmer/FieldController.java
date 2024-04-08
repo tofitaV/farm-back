@@ -1,6 +1,7 @@
 package com.example.happyfarmer;
 
 import com.example.happyfarmer.Utils.DateTimeUtils;
+import com.example.happyfarmer.Utils.LeagueEnum;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,6 +17,7 @@ public class FieldController {
 
     List<Plant> plantList = new ArrayList<>();
     Account account = Account.builder().build();
+    List<Users> usersList = new ArrayList<>();
 
     @RequestMapping(value = "/plant", method = RequestMethod.GET)
     public @ResponseBody List<Plant> getPlant(@RequestHeader("Time-Zone") String timezone) {
@@ -97,7 +99,6 @@ public class FieldController {
         int type = fair.getType();
         switch (type) {
             case 0:
-
                 if (account.getCornCount() >= fair.getPlantCount()) {
                     account.setCornCount(account.getCornCount() - fair.getPlantCount());
                     account.setCoins(account.getCoins() + fair.getCoin());
@@ -118,4 +119,30 @@ public class FieldController {
         }
         return account;
     }
+
+    @RequestMapping(value = "/myLeague", method = RequestMethod.GET)
+    public @ResponseBody int getLeague(@RequestHeader("Time-Zone") String timezone) {
+        int coins = account.getCoins();
+
+        if (coins >= 1000000) {
+            return LeagueEnum.PLATINUM.getLeague();
+        } else if (coins >= 10000) {
+            return LeagueEnum.GOLD.getLeague();
+        } else if (coins >= 5000) {
+            return LeagueEnum.SILVER.getLeague();
+        } else {
+            return LeagueEnum.BRONZE.getLeague();
+        }
+    }
+
+    @RequestMapping(value = "/leagueUsers", method = RequestMethod.GET)
+    public @ResponseBody List<Users> getLeagueUsers(@RequestBody int leagueId, @RequestHeader("Time-Zone") String timezone) {
+
+        for (int i = 1; 0 < i; i++) {
+            usersList.add(Users.builder().name("name " + i).coins(i).build());
+        }
+        return usersList;
+    }
+
+
 }
