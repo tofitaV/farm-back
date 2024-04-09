@@ -2,6 +2,7 @@ package com.example.happyfarmer;
 
 import com.example.happyfarmer.Utils.DateTimeUtils;
 import com.example.happyfarmer.Utils.LeagueEnum;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,11 +14,19 @@ import java.util.List;
 
 @CrossOrigin(maxAge = 3600)
 @Controller
+@RestController
 public class FieldController {
 
     List<Plant> plantList = new ArrayList<>();
     Account account = Account.builder().build();
     List<Users> usersList = new ArrayList<>();
+
+    private final UserRepository userRepository;
+
+    @Autowired
+    public FieldController(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
     @RequestMapping(value = "/plant", method = RequestMethod.GET)
     public @ResponseBody List<Plant> getPlant(@RequestHeader("Time-Zone") String timezone) {
@@ -136,12 +145,8 @@ public class FieldController {
     }
 
     @RequestMapping(value = "/leagueUsers", method = RequestMethod.GET)
-    public @ResponseBody List<Users> getLeagueUsers(@RequestBody int leagueId, @RequestHeader("Time-Zone") String timezone) {
-
-        for (int i = 1; 0 < i; i++) {
-            usersList.add(Users.builder().name("name " + i).coins(i).build());
-        }
-        return usersList;
+    public @ResponseBody List<Users> getLeagueUsers() {
+        return (List<Users>) userRepository.findAll();
     }
 
 
