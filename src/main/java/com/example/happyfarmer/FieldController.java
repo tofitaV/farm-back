@@ -144,9 +144,9 @@ public class FieldController {
         }
     }
 
-    @RequestMapping(value = "/leagueUsers", method = RequestMethod.GET)
-    public @ResponseBody List<Users> getLeagueUsers() {
-        return (List<Users>) userRepository.findAll();
+    @RequestMapping(value = "/leagueUsers", method = RequestMethod.POST)
+    public @ResponseBody List<Users> getLeagueUsers(@RequestBody League leagueId) {
+        return (List<Users>) userRepository.findAllByLeague(leagueId.getId());
     }
 
 
