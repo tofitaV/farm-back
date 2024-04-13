@@ -63,6 +63,12 @@
             <artifactId>mysql-connector-j</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>io.github.kilmajster</groupId>
+            <artifactId>ngrok-spring-boot-starter</artifactId>
+            <version>0.9.2</version>
+        </dependency>
+
     </dependencies>
 
     <build>

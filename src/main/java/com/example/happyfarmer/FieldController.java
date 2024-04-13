@@ -99,7 +99,7 @@ public class FieldController {
     }
 
     @RequestMapping(value = "/depot", method = RequestMethod.GET)
-    public @ResponseBody Account getDepot(@RequestHeader("Time-Zone") String timezone) {
+    public @ResponseBody Account getDepot(  ) {
         return account;
     }
 
