@@ -1,4 +1,4 @@
-package com.example.happyfarmer;
+package com.example.happyfarmer.Models;
 
 import lombok.Data;
 
