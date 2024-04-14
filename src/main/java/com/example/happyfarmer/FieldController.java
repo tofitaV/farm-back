@@ -136,6 +136,9 @@ public class FieldController {
                 break;
         }
         depotRepository.save(account);
+        Users user = userRepository.findByTelegramId(id);
+        user.setCoins(account.getCoins());
+        userRepository.save(user);
         return depotRepository.findDepotByUserId(id);
     }
 
