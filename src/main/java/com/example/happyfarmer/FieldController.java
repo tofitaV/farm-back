@@ -11,7 +11,9 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @CrossOrigin(maxAge = 3600)
 @Controller
@@ -161,7 +163,10 @@ public class FieldController {
     public @ResponseBody List<Users> getLeagueUsers(@RequestBody League leagueId) {
         List<Users> usersList = new ArrayList<>();
         try {
-            usersList = userRepository.findAllByLeague(leagueId.getId());
+            usersList = userRepository.findAllByLeague(leagueId.getId())
+                    .stream()
+                    .sorted(Comparator.comparingLong(Users::getCoins).reversed())
+                    .collect(Collectors.toList());
         } catch (Exception e) {
             e.printStackTrace();
         }
