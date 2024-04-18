@@ -1,4 +1,4 @@
-package com.example.happyfarmer;
+package com.example.happyfarmer.Repositories;
 
 import com.example.happyfarmer.Models.Plant;
 import org.springframework.data.repository.CrudRepository;

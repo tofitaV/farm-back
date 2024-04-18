@@ -1,4 +1,4 @@
-package com.example.happyfarmer;
+package com.example.happyfarmer.Repositories;
 
 import com.example.happyfarmer.Models.Users;
 import org.apache.catalina.User;

@@ -1,8 +1,10 @@
-package com.example.happyfarmer;
+package com.example.happyfarmer.Controllers;
 
+import com.example.happyfarmer.Repositories.DepotRepository;
 import com.example.happyfarmer.Models.*;
+import com.example.happyfarmer.Repositories.PlantRepository;
+import com.example.happyfarmer.Repositories.UserRepository;
 import com.example.happyfarmer.Utils.DateTimeUtils;
-import com.example.happyfarmer.Utils.LeagueEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -10,10 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @CrossOrigin(maxAge = 3600)
 @Controller
@@ -88,30 +87,7 @@ public class FieldController {
         return plantRepository.findAllPlantByUserId(id);
     }
 
-    @RequestMapping(value = "/depot", method = RequestMethod.POST)
-    public @ResponseBody Account harvestPlant(@RequestBody Plant plant, @RequestHeader("id") long id) {
-        int type = plant.getPlantType();
-        Account account = depotRepository.findDepotByUserId(id);
-        switch (type) {
-            case 0:
-                account.setCornCount(account.getCornCount() + 1);
-                break;
-            case 1:
-                account.setCarrotCount(account.getCarrotCount() + 1);
-                break;
-            case 2:
-                account.setPepperCount(account.getPepperCount() + 1);
-                break;
-        }
-        depotRepository.save(account);
-        plantRepository.delete(plant);
-        return depotRepository.findDepotByUserId(id);
-    }
 
-    @RequestMapping(value = "/depot", method = RequestMethod.GET)
-    public @ResponseBody Account getDepot(@RequestHeader("id") long id) {
-        return depotRepository.findDepotByUserId(id);
-    }
 
     @RequestMapping(value = "/fair", method = RequestMethod.POST)
     public @ResponseBody Account sellPlants(@RequestBody Fair fair, @RequestHeader("id") long id) {
@@ -143,35 +119,5 @@ public class FieldController {
         userRepository.save(user);
         return depotRepository.findDepotByUserId(id);
     }
-
-    @RequestMapping(value = "/myLeague", method = RequestMethod.GET)
-    public @ResponseBody int getLeague(@RequestHeader("id") long id) {
-        long coins = depotRepository.findDepotByUserId(id).getCoins();
-
-        if (coins >= 1000000) {
-            return LeagueEnum.PLATINUM.getLeague();
-        } else if (coins >= 10000) {
-            return LeagueEnum.GOLD.getLeague();
-        } else if (coins >= 5000) {
-            return LeagueEnum.SILVER.getLeague();
-        } else {
-            return LeagueEnum.BRONZE.getLeague();
-        }
-    }
-
-    @RequestMapping(value = "/leagueUsers", method = RequestMethod.POST)
-    public @ResponseBody List<Users> getLeagueUsers(@RequestBody League leagueId) {
-        List<Users> usersList = new ArrayList<>();
-        try {
-            usersList = userRepository.findAllByLeague(leagueId.getId())
-                    .stream()
-                    .sorted(Comparator.comparingLong(Users::getCoins).reversed())
-                    .collect(Collectors.toList());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return usersList;
-    }
-
 
 }

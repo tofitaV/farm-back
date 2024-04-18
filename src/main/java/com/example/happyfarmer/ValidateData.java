@@ -1,6 +1,8 @@
 package com.example.happyfarmer;
 
 import com.example.happyfarmer.Models.*;
+import com.example.happyfarmer.Repositories.DepotRepository;
+import com.example.happyfarmer.Repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
