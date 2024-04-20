@@ -1,10 +1,12 @@
 package com.example.happyfarmer.Controllers;
 
-import com.example.happyfarmer.Models.SpinWheelItem;
+import com.example.happyfarmer.Models.Account;
+import com.example.happyfarmer.Models.WheelPrize;
+import com.example.happyfarmer.Repositories.DepotRepository;
+import com.example.happyfarmer.Repositories.WheelRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -12,21 +14,46 @@ import java.util.Random;
 @Controller
 @RestController
 public class SpinWheelController {
-    private static final List<String> items = Arrays.asList(
-            "Corn 1", "Pepper 2", "Nothing 3", "Coins 200 4", "Nothing 5",
-            "Corn 6", "Carrot 7", "Nothing 8", "Pepper 9", "Corn 10"
-    );
+
+    private final WheelRepository wheelRepository;
+    private final DepotRepository depotRepository;
+
+    public SpinWheelController(WheelRepository wheelRepository, DepotRepository depotRepository) {
+        this.wheelRepository = wheelRepository;
+        this.depotRepository = depotRepository;
+    }
 
     @RequestMapping(value = "/spin", method = RequestMethod.GET)
-    public @ResponseBody int spinWheel() {
+    public @ResponseBody WheelPrize spinWheel(@RequestHeader("id") long id) {
+        List<WheelPrize> wheelPrizes = (List<WheelPrize>) wheelRepository.findAll();
+        Account account = depotRepository.findDepotByUserId(id);
         Random random = new Random();
-        int index = random.nextInt(items.size());
-        return index;
+        int i = random.nextInt(wheelPrizes.size());
+        WheelPrize wheelPrize = wheelPrizes.get(i);
+
+        switch (wheelPrize.getPrizeType().type) {
+            case 0:
+                account.setCornCount(account.getCornCount() + wheelPrize.getPrizeCount());
+                break;
+            case 1:
+                account.setCarrotCount(account.getCarrotCount() + wheelPrize.getPrizeCount());
+                break;
+            case 2:
+                account.setPepperCount(account.getPepperCount() + wheelPrize.getPrizeCount());
+                break;
+            case 3:
+                break;
+            case 5:
+                account.setCoins(account.getCoins() + wheelPrize.getPrizeCount());
+                break;
+        }
+        depotRepository.save(account);
+        return wheelPrize;
     }
 
     @RequestMapping(value = "/getSpinWheelRewards", method = RequestMethod.GET)
-    public @ResponseBody List<String> spinRewards() {
-        return items;
+    public @ResponseBody List<WheelPrize> spinRewards() {
+        return (List<WheelPrize>) wheelRepository.findAll();
     }
 
 }
