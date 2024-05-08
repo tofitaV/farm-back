@@ -38,6 +38,7 @@
 
 ### :key: Environment Variables
 To run this project, you will need to add the following environment variables to your .env file. You can take it here https://dashboard.ngrok.com/get-started/your-authtoken
+
 `ngrok.auth-token`
 
 `botToken`
