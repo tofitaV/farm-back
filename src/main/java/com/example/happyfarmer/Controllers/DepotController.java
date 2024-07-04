@@ -22,8 +22,8 @@ public class DepotController {
         this.depotRepository = depotRepository;
         this.plantRepository = plantRepository;
     }
-    @RequestMapping(value = "/depot", method = RequestMethod.POST)
-    public @ResponseBody Account harvestPlant(@RequestBody Plant plant, @RequestHeader("id") long id) {
+    @PostMapping("/depot")
+    public Account harvestPlant(@RequestBody Plant plant, @RequestHeader("id") long id) {
         int type = plant.getPlantType();
         Account account = depotRepository.findDepotByUserId(id);
         switch (type) {
@@ -42,8 +42,8 @@ public class DepotController {
         return depotRepository.findDepotByUserId(id);
     }
 
-    @RequestMapping(value = "/depot", method = RequestMethod.GET)
-    public @ResponseBody Account getDepot(@RequestHeader("id") long id) {
+    @GetMapping("/depot")
+    public Account getDepot(@RequestHeader("id") long id) {
         return depotRepository.findDepotByUserId(id);
     }
 }

@@ -23,10 +23,16 @@ public class SpinWheelController {
         this.depotRepository = depotRepository;
     }
 
-    @RequestMapping(value = "/spin", method = RequestMethod.GET)
-    public @ResponseBody WheelPrize spinWheel(@RequestHeader("id") long id) {
+    @GetMapping("/spin")
+    public WheelPrize spinWheel(@RequestHeader("id") long id) {
         List<WheelPrize> wheelPrizes = (List<WheelPrize>) wheelRepository.findAll();
+        if (wheelPrizes.isEmpty()) {
+            throw new IllegalStateException("No prizes available");
+        }
         Account account = depotRepository.findDepotByUserId(id);
+        if (account == null) {
+            throw new IllegalStateException("Account not found for user id: " + id);
+        }
         Random random = new Random();
         int i = random.nextInt(wheelPrizes.size());
         WheelPrize wheelPrize = wheelPrizes.get(i);
@@ -46,13 +52,15 @@ public class SpinWheelController {
             case 5:
                 account.setCoins(account.getCoins() + wheelPrize.getPrizeCount());
                 break;
+            default:
+                throw new IllegalStateException("Unknown prize type: " + wheelPrize.getPrizeType().type);
         }
         depotRepository.save(account);
         return wheelPrize;
     }
 
-    @RequestMapping(value = "/getSpinWheelRewards", method = RequestMethod.GET)
-    public @ResponseBody List<WheelPrize> spinRewards() {
+    @GetMapping("/getSpinWheelRewards")
+    public List<WheelPrize> spinRewards() {
         return (List<WheelPrize>) wheelRepository.findAll();
     }
 

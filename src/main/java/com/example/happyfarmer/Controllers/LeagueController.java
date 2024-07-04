@@ -26,8 +26,8 @@ public class LeagueController {
         this.userRepository = userRepository;
     }
 
-    @RequestMapping(value = "/myLeague", method = RequestMethod.GET)
-    public @ResponseBody int getLeague(@RequestHeader("id") long id) {
+    @GetMapping("/myLeague")
+    public int getLeague(@RequestHeader("id") long id) {
         long coins = depotRepository.findDepotByUserId(id).getCoins();
 
         if (coins >= 1000000) {
@@ -41,8 +41,8 @@ public class LeagueController {
         }
     }
 
-    @RequestMapping(value = "/leagueUsers", method = RequestMethod.POST)
-    public @ResponseBody List<Users> getLeagueUsers(@RequestBody League leagueId) {
+    @PostMapping("/leagueUsers")
+    public List<Users> getLeagueUsers(@RequestBody League leagueId) {
         List<Users> usersList = new ArrayList<>();
         try {
             usersList = userRepository.findAllByLeague(leagueId.getId())
@@ -51,6 +51,7 @@ public class LeagueController {
                     .collect(Collectors.toList());
         } catch (Exception e) {
             e.printStackTrace();
+            return List.of();
         }
         return usersList;
     }

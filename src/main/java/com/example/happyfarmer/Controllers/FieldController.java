@@ -29,15 +29,13 @@ public class FieldController {
         this.depotRepository = depotRepository;
     }
 
-    @RequestMapping(value = "/plant", method = RequestMethod.GET)
-    public @ResponseBody List<Plant> getPlant(@RequestHeader("id") long id) {
+    @GetMapping("/plant")
+    public List<Plant> getPlant(@RequestHeader("id") long id) {
         List<Plant> plantList = plantRepository.findAllPlantByUserId(id);
         LocalDateTime currentTime = LocalDateTime.now();
         for (Plant plant : plantList) {
-            if (plant.getStageOfGrowing() == 0) {
-                if (plant.getDateTime().plusMinutes(plant.getTimeToGrow()).isBefore(currentTime)) {
-                    plant.setStageOfGrowing(1);
-                }
+            if (plant.getStageOfGrowing() == 0 && plant.getDateTime().plusMinutes(plant.getTimeToGrow()).isBefore(currentTime)) {
+                plant.setStageOfGrowing(1);
             }
         }
 
@@ -54,9 +52,8 @@ public class FieldController {
         return (List<Plant>) plantRepository.saveAll(plantList);
     }
 
-
-    @RequestMapping(value = "/plant", method = RequestMethod.POST)
-    public @ResponseBody Plant createPlant(@RequestBody Plant plant, @RequestHeader("Time-Zone") String timezone) {
+    @PostMapping("/plant")
+    public Plant createPlant(@RequestBody Plant plant, @RequestHeader("Time-Zone") String timezone) {
         plant.setDateTime(DateTimeUtils.justifyDateForClient(plant.getDateTime(), timezone));
         plant.setActualTimeToGrow(plant.getDateTime().plusSeconds(plant.getTimeToGrow()));
 
@@ -68,8 +65,8 @@ public class FieldController {
         return plant;
     }
 
-    @RequestMapping(value = "/plant-stage", method = RequestMethod.POST)
-    public @ResponseBody List<Plant> growPlant(@RequestBody Plant plant, @RequestHeader("Time-Zone") String timezone, @RequestHeader("id") long id) {
+    @PostMapping("/plant-stage")
+    public List<Plant> growPlant(@RequestBody Plant plant, @RequestHeader("Time-Zone") String timezone, @RequestHeader("id") long id) {
         plant.setDateTime(DateTimeUtils.justifyDateForClient(plant.getDateTime(), timezone));
         List<Plant> plantList = plantRepository.findAllPlantByUserId(id);
         plantList.stream()
@@ -81,43 +78,50 @@ public class FieldController {
         return (List<Plant>) plantRepository.saveAll(plantList);
     }
 
-    @RequestMapping(value = "/deletePlant", method = RequestMethod.POST)
-    public @ResponseBody List<Plant> deletePlant(@RequestBody Plant plant, @RequestHeader("id") long id) {
+    @PostMapping("/deletePlant")
+    public List<Plant> deletePlant(@RequestBody Plant plant, @RequestHeader("id") long id) {
         plantRepository.delete(plant);
         return plantRepository.findAllPlantByUserId(id);
     }
 
-
-
-    @RequestMapping(value = "/fair", method = RequestMethod.POST)
-    public @ResponseBody Account sellPlants(@RequestBody Fair fair, @RequestHeader("id") long id) {
+    @PostMapping("/fair")
+    public Account sellPlants(@RequestBody Fair fair, @RequestHeader("id") long id) {
         int type = fair.getType();
         Account account = depotRepository.findDepotByUserId(id);
-        switch (type) {
+        if (account == null) {
+            throw new IllegalStateException("Account not found for user id: " + id);
+        }
+        switch (fair.getType()) {
             case 0:
-                if (account.getCornCount() >= fair.getPlantCount()) {
-                    account.setCornCount(account.getCornCount() - fair.getPlantCount());
-                    account.setCoins(account.getCoins() + fair.getCoin());
-                }
+                sellPlant(account, fair, account.getCornCount(), account::setCornCount);
                 break;
             case 1:
-                if (account.getCarrotCount() >= fair.getPlantCount()) {
-                    account.setCarrotCount(account.getCarrotCount() - fair.getPlantCount());
-                    account.setCoins(account.getCoins() + fair.getCoin());
-                }
+                sellPlant(account, fair, account.getCarrotCount(), account::setCarrotCount);
                 break;
             case 2:
-                if (account.getPepperCount() >= fair.getPlantCount()) {
-                    account.setPepperCount(account.getPepperCount() - fair.getPlantCount());
-                    account.setCoins(account.getCoins() + fair.getCoin());
-                }
+                sellPlant(account, fair, account.getPepperCount(), account::setPepperCount);
                 break;
+            default:
+                throw new IllegalArgumentException("Invalid plant type: " + fair.getType());
         }
+
         depotRepository.save(account);
         Users user = userRepository.findByTelegramId(id);
-        user.setCoins(account.getCoins());
-        userRepository.save(user);
+        if (user != null) {
+            user.setCoins(account.getCoins());
+            userRepository.save(user);
+        }
         return depotRepository.findDepotByUserId(id);
+    }
+
+    private void sellPlant(Account account, Fair fair, int plantCount, java.util.function.Consumer<Integer> setPlantCount) {
+        if (plantCount >= fair.getPlantCount()) {
+            setPlantCount.accept(plantCount - fair.getPlantCount());
+            account.setCoins(account.getCoins() + fair.getCoin());
+            depotRepository.save(account);
+        } else {
+            throw new IllegalStateException("Not enough plants to sell");
+        }
     }
 
 }
