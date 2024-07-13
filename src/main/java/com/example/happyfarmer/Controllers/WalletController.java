@@ -22,7 +22,7 @@ public class WalletController {
         return new MyWallet().getWalletBalance(mnemonic);
     }
 
-    @RequestMapping(value = "/lastTransactionShortInfo", method = RequestMethod.POST)
+  /*  @RequestMapping(value = "/lastTransactionShortInfo", method = RequestMethod.POST)
     public @ResponseBody List<String> lastTransactionShortInfo(@RequestBody WalletInfo mnemonic) {
         return new MyTransaction().getLastTenTransactionsShortInfo(mnemonic);
     }
@@ -30,10 +30,10 @@ public class WalletController {
     @RequestMapping(value = "/lastTransaction", method = RequestMethod.POST)
     public @ResponseBody List<RawTransaction> lastTransaction(@RequestBody WalletInfo mnemonic) {
         return new MyTransaction().getLastTenTransaction(mnemonic);
-    }
+    }*/
 
-    @RequestMapping(value = "/transaction", method = RequestMethod.POST)
+    /*@RequestMapping(value = "/transaction", method = RequestMethod.POST)
     public @ResponseBody void createTransaction(@RequestBody WalletInfo mnemonic) {
         new MyTransaction().createTransaction(mnemonic);
-    }
+    }*/
 }

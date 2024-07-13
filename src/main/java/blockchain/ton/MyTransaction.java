@@ -7,8 +7,6 @@ import org.assertj.core.api.AssertionsForClassTypes;
 import org.ton.java.address.Address;
 import org.ton.java.mnemonic.Mnemonic;
 import org.ton.java.mnemonic.Pair;
-import org.ton.java.smartcontract.wallet.WalletContract;
-import org.ton.java.smartcontract.wallet.v4.WalletV4ContractR2;
 import org.ton.java.tonlib.types.*;
 import org.ton.java.utils.Utils;
 
@@ -22,7 +20,7 @@ public class MyTransaction {
 
 
 
-    @SneakyThrows
+  /*  @SneakyThrows
     public void createTransaction(WalletInfo walletInfo) {
         WalletContract wallet = new MyWallet().createWallet(walletInfo);
         List<String> mnenomicList = Arrays.asList(walletInfo.getMnemonic().split("\\s+"));
@@ -38,9 +36,9 @@ public class MyTransaction {
             Utils.sleep(30);
             System.out.println("Success");
         }
-    }
+    }*/
 
-    public List<String> getLastTenTransactionsShortInfo(WalletInfo walletInfo) {
+    /*public List<String> getLastTenTransactionsShortInfo(WalletInfo walletInfo) {
         MyWallet myWallet = new MyWallet();
         WalletContract wallet = myWallet.createWallet(walletInfo);
         Address addr = Address.of(wallet.getAddress());
@@ -62,9 +60,9 @@ public class MyTransaction {
                     return "Empty";
                 }).toList();
         return transactionList;
-    }
+    }*/
 
-    public List<RawTransaction> getLastTenTransaction(WalletInfo walletInfo) {
+   /* public List<RawTransaction> getLastTenTransaction(WalletInfo walletInfo) {
         MyWallet myWallet = new MyWallet();
         WalletContract wallet = myWallet.createWallet(walletInfo);
         Address addr = Address.of(wallet.getAddress());
@@ -73,5 +71,5 @@ public class MyTransaction {
         LastTransactionId lastTransactionId = fullAccountState.getLast_transaction_id();
         RawTransactions rawTransactions = tonlib.getAllRawTransactions(addr.toString(true), lastTransactionId.getLt(), lastTransactionId.getHash(), 10);
         return rawTransactions.getTransactions();
-    }
+    }*/
 }

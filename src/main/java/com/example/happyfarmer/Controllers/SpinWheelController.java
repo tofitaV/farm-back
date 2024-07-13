@@ -59,7 +59,7 @@ public class SpinWheelController {
         return wheelPrize;
     }
 
-    @GetMapping("/getSpinWheelRewards")
+    @GetMapping("/rewards")
     public List<WheelPrize> spinRewards() {
         return (List<WheelPrize>) wheelRepository.findAll();
     }
