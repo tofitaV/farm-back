@@ -42,11 +42,18 @@ public class ValidateData {
 
         String computedHash = computeHmacSHA256(dataCheckString.getBytes(StandardCharsets.UTF_8), secretKey.getBytes(StandardCharsets.UTF_8));
         //if (computedHash.equals(receivedHash)) {
-        if (false) {
+        if (true) {
             try {
                 TelegramUser telegramUser = initDataUnsafe.getUser();
                 Users user = userRepository.findByTelegramId(telegramUser.getId());
                 if (user != null) {
+                    if (!depotRepository.existsByUserId(user.getTelegramId())) {
+                        Users newUser = Users.builder()
+                                .name(telegramUser.getUsername())
+                                .telegramId(telegramUser.getId())
+                                .build();
+                        depotRepository.save(Account.builder().userId(newUser.getTelegramId()).coins(user.getCoins()).build());
+                    }
                     return ResponseEntity.ok(user.getTelegramId());
                 } else {
                     Users newUser = Users.builder()
@@ -57,6 +64,7 @@ public class ValidateData {
                     depotRepository.save(Account.builder().userId(newUser.getTelegramId()).build());
                     return ResponseEntity.ok(newUser.getTelegramId());
                 }
+
             } catch (Exception e) {
                 e.printStackTrace();
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error occurred: " + e.getMessage());

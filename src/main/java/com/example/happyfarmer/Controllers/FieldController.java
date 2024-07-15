@@ -1,9 +1,11 @@
 package com.example.happyfarmer.Controllers;
 
+import com.example.happyfarmer.Models.Account;
+import com.example.happyfarmer.Models.Fair;
+import com.example.happyfarmer.Models.Plant;
 import com.example.happyfarmer.Repositories.DepotRepository;
-import com.example.happyfarmer.Models.*;
 import com.example.happyfarmer.Repositories.PlantRepository;
-import com.example.happyfarmer.Repositories.UserRepository;
+import com.example.happyfarmer.Services.TransactionService;
 import com.example.happyfarmer.Utils.DateTimeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -18,15 +20,15 @@ import java.util.List;
 @Controller
 @RestController
 public class FieldController {
-    private final UserRepository userRepository;
     private final DepotRepository depotRepository;
     private final PlantRepository plantRepository;
+    private final TransactionService transactionService;
 
     @Autowired
-    public FieldController(UserRepository userRepository, PlantRepository plantRepository, DepotRepository depotRepository) {
-        this.userRepository = userRepository;
+    public FieldController(PlantRepository plantRepository, DepotRepository depotRepository, TransactionService transactionService) {
         this.plantRepository = plantRepository;
         this.depotRepository = depotRepository;
+        this.transactionService = transactionService;
     }
 
     @GetMapping("/plant")
@@ -91,35 +93,32 @@ public class FieldController {
         if (account == null) {
             throw new IllegalStateException("Account not found for user id: " + id);
         }
-        switch (fair.getType()) {
-            case 0:
-                sellPlant(account, fair, account.getCornCount(), account::setCornCount);
-                break;
-            case 1:
-                sellPlant(account, fair, account.getCarrotCount(), account::setCarrotCount);
-                break;
-            case 2:
-                sellPlant(account, fair, account.getPepperCount(), account::setPepperCount);
-                break;
-            default:
-                throw new IllegalArgumentException("Invalid plant type: " + fair.getType());
+        try {
+            switch (fair.getType()) {
+                case 0:
+                    sellPlant(account, fair, account.getCornCount(), account::setCornCount);
+                    break;
+                case 1:
+                    sellPlant(account, fair, account.getCarrotCount(), account::setCarrotCount);
+                    break;
+                case 2:
+                    sellPlant(account, fair, account.getPepperCount(), account::setPepperCount);
+                    break;
+            }
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Invalid plant type: " + fair.getType());
         }
 
-        depotRepository.save(account);
-        Users user = userRepository.findByTelegramId(id);
-        if (user != null) {
-            user.setCoins(account.getCoins());
-            userRepository.save(user);
-        }
         return depotRepository.findDepotByUserId(id);
     }
 
     private void sellPlant(Account account, Fair fair, int plantCount, java.util.function.Consumer<Integer> setPlantCount) {
-        if (plantCount >= fair.getPlantCount()) {
-            setPlantCount.accept(plantCount - fair.getPlantCount());
-            account.setCoins(account.getCoins() + fair.getCoin());
-            depotRepository.save(account);
-        } else {
+        try {
+            if (plantCount >= fair.getPlantCount()) {
+                setPlantCount.accept(plantCount - fair.getPlantCount());
+                transactionService.updateCoins(account.getUserId(), account.getCoins() + fair.getCoin());
+            }
+        } catch (IllegalStateException e) {
             throw new IllegalStateException("Not enough plants to sell");
         }
     }

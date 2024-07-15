@@ -3,6 +3,7 @@ package com.example.happyfarmer.Controllers;
 
 import com.example.happyfarmer.Models.Account;
 import com.example.happyfarmer.Repositories.DepotRepository;
+import com.example.happyfarmer.Services.TransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -12,22 +13,17 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 public class TransactionController {
 
-    private final DepotRepository depotRepository;
+    private final TransactionService transactionService;
 
     @Autowired
-    public TransactionController(DepotRepository depotRepository) {
-        this.depotRepository = depotRepository;
+    public TransactionController(TransactionService transactionService) {
+        this.transactionService = transactionService;
     }
 
     @PostMapping("/coinTransaction")
     public int verifyTransactionSuccessAndAddCoins(@RequestBody String boc, @RequestHeader("id") long id) {
         if (!boc.isEmpty()) {
-            //msg_hash = Cell.one_from_boc(result["boc"]).hash.hex()
-            //    print(f"Transaction info -> https://toncenter.com/api/v3/transactionsByMessage?direction=out&msg_hash={msg_hash}&limit=128&offset=0")
-            //    print("Done")
-            Account account = depotRepository.findDepotByUserId(id);
-            account.setCoins(account.getCoins() + 1000);
-            depotRepository.save(account);
+            transactionService.updateCoins(id, 1000);
             return 0;
         } else {
             return 1;

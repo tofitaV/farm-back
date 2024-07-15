@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 public class Account {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    int id;
+    long id;
     @Builder.Default
     int carrotCount = 0;
     @Builder.Default

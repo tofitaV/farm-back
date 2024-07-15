@@ -1,5 +1,6 @@
 package com.example.happyfarmer.Controllers;
 
+import com.example.happyfarmer.Models.Account;
 import com.example.happyfarmer.Repositories.DepotRepository;
 import com.example.happyfarmer.Models.League;
 import com.example.happyfarmer.Models.Users;
@@ -28,8 +29,8 @@ public class LeagueController {
 
     @GetMapping("/myLeague")
     public int getLeague(@RequestHeader("id") long id) {
-        long coins = depotRepository.findDepotByUserId(id).getCoins();
-
+        Account account = depotRepository.findDepotByUserId(id);
+        long coins = account.getCoins();
         if (coins >= 1000000) {
             return LeagueEnum.PLATINUM.getLeague();
         } else if (coins >= 10000) {

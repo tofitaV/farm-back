@@ -1,8 +1,8 @@
 package com.example.happyfarmer.Controllers;
 
-import com.example.happyfarmer.Repositories.DepotRepository;
 import com.example.happyfarmer.Models.Account;
 import com.example.happyfarmer.Models.Plant;
+import com.example.happyfarmer.Repositories.DepotRepository;
 import com.example.happyfarmer.Repositories.PlantRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -22,10 +22,14 @@ public class DepotController {
         this.depotRepository = depotRepository;
         this.plantRepository = plantRepository;
     }
+
     @PostMapping("/depot")
     public Account harvestPlant(@RequestBody Plant plant, @RequestHeader("id") long id) {
         int type = plant.getPlantType();
         Account account = depotRepository.findDepotByUserId(id);
+        if (account == null) {
+            account = Account.builder().id(id).coins(0).carrotCount(0).pepperCount(0).cornCount(0).build();
+        }
         switch (type) {
             case 0:
                 account.setCornCount(account.getCornCount() + 1);
