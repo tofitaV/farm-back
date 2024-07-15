@@ -3,6 +3,7 @@ package com.example.happyfarmer;
 import com.example.happyfarmer.Models.*;
 import com.example.happyfarmer.Repositories.DepotRepository;
 import com.example.happyfarmer.Repositories.UserRepository;
+import com.example.happyfarmer.Utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -42,7 +43,7 @@ public class ValidateData {
 
         String computedHash = computeHmacSHA256(dataCheckString.getBytes(StandardCharsets.UTF_8), secretKey.getBytes(StandardCharsets.UTF_8));
         //if (computedHash.equals(receivedHash)) {
-        if (true) {
+        if (false) {
             try {
                 TelegramUser telegramUser = initDataUnsafe.getUser();
                 Users user = userRepository.findByTelegramId(telegramUser.getId());
@@ -59,6 +60,7 @@ public class ValidateData {
                     Users newUser = Users.builder()
                             .name(telegramUser.getUsername())
                             .telegramId(telegramUser.getId())
+                            .referralCode(Utils.generateReferralCode())
                             .build();
                     userRepository.save(newUser);
                     depotRepository.save(Account.builder().userId(newUser.getTelegramId()).build());
