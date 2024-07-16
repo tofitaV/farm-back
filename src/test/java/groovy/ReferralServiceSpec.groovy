@@ -15,7 +15,7 @@ class ReferralServiceSpec extends Specification {
 
     def "encrypt and decrypt should return original inviterId"() {
         given:
-        String inviterId = "123456"
+        String inviterId = "6656754286"
 
         when:
         String encrypted = referralService.encrypt(inviterId)
@@ -28,7 +28,7 @@ class ReferralServiceSpec extends Specification {
 
     def "encrypt and decrypt should return original inviterId even when id is negative"() {
         given:
-        String inviterId = "-123456"
+        String inviterId = "-6656754286"
 
         when:
         String encrypted = referralService.encrypt(inviterId)

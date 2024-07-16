@@ -18,4 +18,5 @@ public class Users {
     int league;
     long telegramId;
     String referralCode;
+    String referredBy;
 }

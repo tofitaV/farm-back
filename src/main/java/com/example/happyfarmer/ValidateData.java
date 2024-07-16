@@ -3,6 +3,7 @@ package com.example.happyfarmer;
 import com.example.happyfarmer.Models.*;
 import com.example.happyfarmer.Repositories.DepotRepository;
 import com.example.happyfarmer.Repositories.UserRepository;
+import com.example.happyfarmer.Services.ReferralService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,40 +26,42 @@ public class ValidateData {
 
     private final UserRepository userRepository;
     private final DepotRepository depotRepository;
+    private final ReferralService referralService;
 
     @Autowired
-    public ValidateData(UserRepository userRepository, DepotRepository depotRepository) {
+    public ValidateData(UserRepository userRepository, DepotRepository depotRepository, ReferralService referralService) {
         this.userRepository = userRepository;
         this.depotRepository = depotRepository;
+        this.referralService = referralService;
     }
 
     @RequestMapping(value = "/authorize", method = RequestMethod.POST)
     public ResponseEntity<?> validateData(@RequestBody TelegramUserInfo telegramUserInfo) {
         InitDataUnsafe initDataUnsafe = telegramUserInfo.getInitDataUnsafe();
         String receivedHash = initDataUnsafe.getHash();
+        String refCode = initDataUnsafe.getStart_param();
 
         String dataCheckString = createDataCheckString(initDataUnsafe);
         String secretKey = generateSecretKey(BOT_TOKEN);
 
         String computedHash = computeHmacSHA256(dataCheckString.getBytes(StandardCharsets.UTF_8), secretKey.getBytes(StandardCharsets.UTF_8));
         //if (computedHash.equals(receivedHash)) {
-        if (false) {
+        if (true) {
             try {
                 TelegramUser telegramUser = initDataUnsafe.getUser();
                 Users user = userRepository.findByTelegramId(telegramUser.getId());
                 if (user != null) {
                     if (!depotRepository.existsByUserId(user.getTelegramId())) {
-                        Users newUser = Users.builder()
-                                .name(telegramUser.getUsername())
-                                .telegramId(telegramUser.getId())
-                                .build();
-                        depotRepository.save(Account.builder().userId(newUser.getTelegramId()).coins(user.getCoins()).build());
+                        depotRepository.save(Account.builder().userId(telegramUser.getId()).coins(user.getCoins()).build());
                     }
                     return ResponseEntity.ok(user.getTelegramId());
                 } else {
+                    long telegramId = telegramUser.getId();
                     Users newUser = Users.builder()
                             .name(telegramUser.getUsername())
-                            .telegramId(telegramUser.getId())
+                            .telegramId(telegramId)
+                            .referredBy(refCode)
+                            .referralCode(String.valueOf(telegramId))
                             .build();
                     userRepository.save(newUser);
                     depotRepository.save(Account.builder().userId(newUser.getTelegramId()).build());

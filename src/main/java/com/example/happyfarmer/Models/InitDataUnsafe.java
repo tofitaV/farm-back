@@ -9,4 +9,5 @@ public class InitDataUnsafe {
     String hash;
     String query_id;
     TelegramUser user;
+    String start_param;
 }
