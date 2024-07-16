@@ -43,6 +43,10 @@ To run this project, you will need to add the following environment variables to
 
 `botToken`
 
+Also, set up a secret key in JVM Options and Spock Configuration for tests
+It is important to make sure that the key length corresponds to the required length - 16 bits
+`secretKey`
+
 
 
 ## :toolbox: Getting Started
