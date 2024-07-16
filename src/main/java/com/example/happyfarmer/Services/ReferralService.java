@@ -2,9 +2,8 @@ package com.example.happyfarmer.Services;
 
 import org.springframework.stereotype.Service;
 import javax.crypto.Cipher;
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.Base64;
@@ -16,20 +15,14 @@ public class ReferralService {
     private static final String AES_GCM_NO_PADDING = "AES/GCM/NoPadding";
     private static final int GCM_TAG_LENGTH = 16;
     private static final int GCM_IV_LENGTH = 12;
-    private static final int AES_KEY_SIZE = 256;
 
-    private final SecretKey secretKey;
+    private final SecretKeySpec secretKey;
     private final SecureRandom secureRandom;
+    private String key = System.getProperty("secretKey");
 
     public ReferralService() throws Exception {
-        this.secretKey = generateKey();
+        this.secretKey = new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), AES);
         this.secureRandom = new SecureRandom();
-    }
-
-    private SecretKey generateKey() throws Exception {
-        KeyGenerator keyGen = KeyGenerator.getInstance(AES);
-        keyGen.init(AES_KEY_SIZE);
-        return keyGen.generateKey();
     }
 
     public String encrypt(String inviterId) throws Exception {
