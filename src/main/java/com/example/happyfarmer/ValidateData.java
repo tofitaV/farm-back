@@ -54,20 +54,49 @@ public class ValidateData {
                     if (!depotRepository.existsByUserId(user.getTelegramId())) {
                         depotRepository.save(Account.builder().userId(telegramUser.getId()).coins(user.getCoins()).build());
                     }
+                    long parsedRefCode;
+                    if (refCode != null) {
+                        if (!refCode.isEmpty()) {
+                            try {
+                                parsedRefCode = Long.parseLong(refCode);
+                            } catch (NumberFormatException e) {
+                                throw new NumberFormatException("Cannot parse");
+                            }
+                            if (userRepository.existsByTelegramId(parsedRefCode)) {
+                                if (parsedRefCode != user.getTelegramId()) {
+                                    user.setReferredBy(refCode);
+                                    userRepository.save(user);
+                                }
+                            }
+                        }
+                    }
                     return ResponseEntity.ok(user.getTelegramId());
                 } else {
                     long telegramId = telegramUser.getId();
                     Users newUser = Users.builder()
                             .name(telegramUser.getUsername())
                             .telegramId(telegramId)
-                            .referredBy(refCode)
                             .referralCode(String.valueOf(telegramId))
                             .build();
+                    long parsedRefCode;
+                    if (refCode != null) {
+                        if (!refCode.isEmpty()) {
+                            try {
+                                parsedRefCode = Long.parseLong(refCode);
+                            } catch (NumberFormatException e) {
+                                throw new NumberFormatException("Cannot parse");
+                            }
+                            if (userRepository.existsByTelegramId(parsedRefCode)) {
+                                if (parsedRefCode != newUser.getTelegramId()) {
+                                    newUser.setReferredBy(refCode);
+                                }
+                            }
+                        }
+                    }
                     userRepository.save(newUser);
                     depotRepository.save(Account.builder().userId(newUser.getTelegramId()).build());
                     return ResponseEntity.ok(newUser.getTelegramId());
                 }
-
             } catch (Exception e) {
                 e.printStackTrace();
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error occurred: " + e.getMessage());

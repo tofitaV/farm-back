@@ -1,8 +1,10 @@
 package com.example.happyfarmer.Services;
 
-import com.example.happyfarmer.Models.ReferralLink;
+import com.example.happyfarmer.Models.Friend;
 import com.example.happyfarmer.Repositories.UserRepository;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class ReferralService {
@@ -13,9 +15,8 @@ public class ReferralService {
         this.userRepository = userRepository;
     }
 
-    public ReferralLink getMyReferralLink(long id) {
-        String code = userRepository.getReferralCode(id);
-        String link = "https://t.me/crypto_plants_bot/plants?start=".concat(code);
-        return ReferralLink.builder().link(link).build();
+    public List<Friend> getMyFriends(long id) {
+        List<Friend> friendList = userRepository.findAllFriendsByReferredBy(id);
+        return friendList;
     }
 }
