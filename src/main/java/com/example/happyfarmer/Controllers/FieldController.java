@@ -21,8 +21,8 @@ public class FieldController {
     }
 
     @GetMapping("/plant")
-    public List<Plant> getPlant(@RequestHeader("id") long id) {
-        return plantService.getPlants(id);
+    public List<Plant> getPlant(@RequestHeader("id") long id, @RequestHeader("Time-Zone") String timezoneString) {
+        return plantService.getPlants(id, timezoneString);
     }
 
     @PostMapping("/plant")

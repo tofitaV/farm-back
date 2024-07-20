@@ -26,20 +26,21 @@ public class PlantService {
         this.transactionService = transactionService;
     }
 
-    public List<Plant> getPlants(long id) {
+    public List<Plant> getPlants(long id, String timezone) {
         List<Plant> plantList = plantRepository.findAllPlantByUserId(id);
-        LocalDateTime currentTime = LocalDateTime.now();
+        ZoneId userZoneId = ZoneId.of(timezone);
+        ZonedDateTime currentTime = ZonedDateTime.now(userZoneId);
+
         for (Plant plant : plantList) {
-            if (plant.getStageOfGrowing() == 0 && plant.getDateTime().plusMinutes(plant.getTimeToGrow()).isBefore(currentTime)) {
+            ZonedDateTime plantDateTimeInUserZone = plant.getDateTime().atZone(ZoneId.systemDefault()).withZoneSameInstant(userZoneId);
+            if (plant.getStageOfGrowing() == 0 && plantDateTimeInUserZone.plusMinutes(plant.getTimeToGrow()).isBefore(currentTime)) {
                 plant.setStageOfGrowing(1);
             }
         }
 
         for (Plant plant : plantList) {
-            ZoneId zoneId = ZoneId.systemDefault();
-            ZonedDateTime zonedDateTime = ZonedDateTime.of(currentTime, zoneId);
-            ZonedDateTime plantZonedDateTime = ZonedDateTime.of(plant.getActualTimeToGrow(), zoneId);
-            long currentTimestamp = zonedDateTime.toInstant().toEpochMilli();
+            ZonedDateTime plantZonedDateTime = plant.getActualTimeToGrow().atZone(userZoneId);
+            long currentTimestamp = currentTime.toInstant().toEpochMilli();
             long plantCurrentTimestamp = plantZonedDateTime.toInstant().toEpochMilli();
             if (plantCurrentTimestamp - currentTimestamp <= 0) {
                 plant.setIsGrow(true);
