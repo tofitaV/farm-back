@@ -2,8 +2,10 @@ package com.example.happyfarmer.Services;
 
 import com.example.happyfarmer.Models.Account;
 import com.example.happyfarmer.Models.Plant;
+import com.example.happyfarmer.Models.Users;
 import com.example.happyfarmer.Repositories.DepotRepository;
 import com.example.happyfarmer.Repositories.PlantRepository;
+import com.example.happyfarmer.Repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,11 +14,13 @@ public class DepotService {
 
     private final DepotRepository depotRepository;
     private final PlantRepository plantRepository;
+    private final UserRepository userRepository;
 
     @Autowired
-    public DepotService(PlantRepository plantRepository, DepotRepository depotRepository) {
+    public DepotService(PlantRepository plantRepository, DepotRepository depotRepository, UserRepository userRepository) {
         this.depotRepository = depotRepository;
         this.plantRepository = plantRepository;
+        this.userRepository = userRepository;
     }
     public Account harvest(Plant plant, long id){
         int type = plant.getPlantType();
@@ -41,6 +45,10 @@ public class DepotService {
     }
 
     public Account getDepot(long id){
+        if (!depotRepository.existsByUserId(id)) {
+            Users user = userRepository.findByTelegramId(id);
+            depotRepository.save(Account.builder().userId(id).coins(user.getCoins()).build());
+        }
         return depotRepository.findDepotByUserId(id);
     }
 }

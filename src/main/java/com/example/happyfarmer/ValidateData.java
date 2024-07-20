@@ -3,7 +3,6 @@ package com.example.happyfarmer;
 import com.example.happyfarmer.Models.*;
 import com.example.happyfarmer.Repositories.DepotRepository;
 import com.example.happyfarmer.Repositories.UserRepository;
-import com.example.happyfarmer.Services.ReferralService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,13 +25,11 @@ public class ValidateData {
 
     private final UserRepository userRepository;
     private final DepotRepository depotRepository;
-    private final ReferralService referralService;
 
     @Autowired
-    public ValidateData(UserRepository userRepository, DepotRepository depotRepository, ReferralService referralService) {
+    public ValidateData(UserRepository userRepository, DepotRepository depotRepository) {
         this.userRepository = userRepository;
         this.depotRepository = depotRepository;
-        this.referralService = referralService;
     }
 
     @RequestMapping(value = "/authorize", method = RequestMethod.POST)
@@ -50,51 +47,12 @@ public class ValidateData {
             try {
                 TelegramUser telegramUser = initDataUnsafe.getUser();
                 Users user = userRepository.findByTelegramId(telegramUser.getId());
+
                 if (user != null) {
-                    if (!depotRepository.existsByUserId(user.getTelegramId())) {
-                        depotRepository.save(Account.builder().userId(telegramUser.getId()).coins(user.getCoins()).build());
-                    }
-                    long parsedRefCode;
-                    if (refCode != null) {
-                        if (!refCode.isEmpty()) {
-                            try {
-                                parsedRefCode = Long.parseLong(refCode);
-                            } catch (NumberFormatException e) {
-                                throw new NumberFormatException("Cannot parse");
-                            }
-                            if (userRepository.existsByTelegramId(parsedRefCode)) {
-                                if (parsedRefCode != user.getTelegramId()) {
-                                    user.setReferredBy(refCode);
-                                    userRepository.save(user);
-                                }
-                            }
-                        }
-                    }
+                    handleExistingUser(user, refCode);
                     return ResponseEntity.ok(user.getTelegramId());
                 } else {
-                    long telegramId = telegramUser.getId();
-                    Users newUser = Users.builder()
-                            .name(telegramUser.getUsername())
-                            .telegramId(telegramId)
-                            .referralCode(String.valueOf(telegramId))
-                            .build();
-                    long parsedRefCode;
-                    if (refCode != null) {
-                        if (!refCode.isEmpty()) {
-                            try {
-                                parsedRefCode = Long.parseLong(refCode);
-                            } catch (NumberFormatException e) {
-                                throw new NumberFormatException("Cannot parse");
-                            }
-                            if (userRepository.existsByTelegramId(parsedRefCode)) {
-                                if (parsedRefCode != newUser.getTelegramId()) {
-                                    newUser.setReferredBy(refCode);
-                                }
-                            }
-                        }
-                    }
-                    userRepository.save(newUser);
-                    depotRepository.save(Account.builder().userId(newUser.getTelegramId()).build());
+                    Users newUser = createNewUser(telegramUser, refCode);
                     return ResponseEntity.ok(newUser.getTelegramId());
                 }
             } catch (Exception e) {
@@ -103,6 +61,48 @@ public class ValidateData {
             }
         } else {
             return ResponseEntity.ok(294367378);
+        }
+    }
+
+    private void handleExistingUser(Users user, String refCode) {
+        if (!depotRepository.existsByUserId(user.getTelegramId())) {
+            depotRepository.save(Account.builder().userId(user.getTelegramId()).coins(user.getCoins()).build());
+        }
+
+        if (isValidRefCode(refCode) && !refCode.equals(String.valueOf(user.getTelegramId()))) {
+            user.setReferredBy(refCode);
+            userRepository.save(user);
+        }
+    }
+
+    private Users createNewUser(TelegramUser telegramUser, String refCode) {
+        long telegramId = telegramUser.getId();
+        Users newUser = Users.builder()
+                .name(telegramUser.getUsername())
+                .telegramId(telegramId)
+                .referralCode(String.valueOf(telegramId))
+                .build();
+
+        if (isValidRefCode(refCode) && !refCode.equals(String.valueOf(newUser.getTelegramId()))) {
+            newUser.setReferredBy(refCode);
+        }
+
+        userRepository.save(newUser);
+        if (!depotRepository.existsByUserId(newUser.getTelegramId())){
+            depotRepository.save(Account.builder().userId(newUser.getTelegramId()).build());
+        }
+        return newUser;
+    }
+
+    private boolean isValidRefCode(String refCode) {
+        if (refCode == null || refCode.isEmpty()) {
+            return false;
+        }
+        try {
+            long parsedRefCode = Long.parseLong(refCode);
+            return userRepository.existsByTelegramId(parsedRefCode);
+        } catch (NumberFormatException e) {
+            throw new NumberFormatException("Cannot parse referral code");
         }
     }
 
