@@ -3,9 +3,7 @@ package com.example.happyfarmer;
 import com.example.happyfarmer.Models.*;
 import com.example.happyfarmer.Repositories.DepotRepository;
 import com.example.happyfarmer.Repositories.UserRepository;
-import org.apache.commons.codec.digest.HmacUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.util.Pair;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -13,12 +11,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 
 @CrossOrigin(maxAge = 3600)
 @RestController
