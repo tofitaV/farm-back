@@ -3,8 +3,10 @@ package com.example.happyfarmer.Services;
 import com.example.happyfarmer.Models.Account;
 import com.example.happyfarmer.Models.Fair;
 import com.example.happyfarmer.Models.Plant;
+import com.example.happyfarmer.Models.PlantType;
 import com.example.happyfarmer.Repositories.DepotRepository;
 import com.example.happyfarmer.Repositories.PlantRepository;
+import com.example.happyfarmer.Repositories.PlantTypesRepository;
 import com.example.happyfarmer.Utils.DateTimeUtils;
 import com.example.happyfarmer.Utils.ItemEnum;
 import org.springframework.stereotype.Service;
@@ -19,11 +21,13 @@ public class PlantService {
     private final DepotRepository depotRepository;
     private final PlantRepository plantRepository;
     private final TransactionService transactionService;
+    private final PlantTypesRepository plantTypesRepository;
 
-    public PlantService(DepotRepository depotRepository, PlantRepository plantRepository, TransactionService transactionService) {
+    public PlantService(DepotRepository depotRepository, PlantRepository plantRepository, TransactionService transactionService, PlantTypesRepository plantTypesRepository) {
         this.depotRepository = depotRepository;
         this.plantRepository = plantRepository;
         this.transactionService = transactionService;
+        this.plantTypesRepository = plantTypesRepository;
     }
 
     public List<Plant> getPlants(long id, String timezone) {
@@ -67,15 +71,16 @@ public class PlantService {
     }
 
     public Plant createPlant(Plant plant, long userId) {
+        PlantType plantType = plantTypesRepository.findByPlantType(plant.getPlantType());
         ZonedDateTime utcNow = ZonedDateTime.now(ZoneId.of("UTC"));
-        ZonedDateTime utcActualTimeToGrow = utcNow.plusSeconds(10);
+        ZonedDateTime utcActualTimeToGrow = utcNow.plusSeconds(plantType.getTimeToGrow());
         plant.setDateTime(utcNow.toLocalDateTime());
         plant.setActualTimeToGrow(utcActualTimeToGrow.toLocalDateTime());
         plant.setUserId(userId);
         plant.setStageOfGrowing(0);
         plant.setIsGrow(false);
         plant.setName(ItemEnum.getNameByType(plant.getPlantType()));
-        plant.setTimeToGrow(10);
+        plant.setTimeToGrow(plantType.getTimeToGrow());
 
         try {
             plantRepository.save(plant);
