@@ -6,9 +6,9 @@ import com.example.happyfarmer.Models.Plant;
 import com.example.happyfarmer.Repositories.DepotRepository;
 import com.example.happyfarmer.Repositories.PlantRepository;
 import com.example.happyfarmer.Utils.DateTimeUtils;
+import com.example.happyfarmer.Utils.ItemEnum;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -28,25 +28,30 @@ public class PlantService {
 
     public List<Plant> getPlants(long id, String timezone) {
         List<Plant> plantList = plantRepository.findAllPlantByUserId(id);
-        ZoneId userZoneId = ZoneId.of(timezone);
-        ZonedDateTime currentTime = ZonedDateTime.now(userZoneId);
+        ZonedDateTime currentTimeUTC = ZonedDateTime.now(ZoneId.of("UTC"));
+        ZoneId clientZoneId = ZoneId.of(timezone);
 
         for (Plant plant : plantList) {
-            ZonedDateTime plantDateTimeInUserZone = plant.getDateTime().atZone(ZoneId.systemDefault()).withZoneSameInstant(userZoneId);
-            if (plant.getStageOfGrowing() == 0 && plantDateTimeInUserZone.plusMinutes(plant.getTimeToGrow()).isBefore(currentTime)) {
+            ZonedDateTime plantActualTimeToGrowUTC = plant.getActualTimeToGrow().atZone(ZoneId.of("UTC"));
+
+            if (plant.getStageOfGrowing() == 0 && plantActualTimeToGrowUTC.isBefore(currentTimeUTC)) {
                 plant.setStageOfGrowing(1);
             }
-        }
 
-        for (Plant plant : plantList) {
-            ZonedDateTime plantZonedDateTime = plant.getActualTimeToGrow().atZone(userZoneId);
-            long currentTimestamp = currentTime.toInstant().toEpochMilli();
-            long plantCurrentTimestamp = plantZonedDateTime.toInstant().toEpochMilli();
-            if (plantCurrentTimestamp - currentTimestamp <= 0) {
+            if (plantActualTimeToGrowUTC.isBefore(currentTimeUTC)) {
                 plant.setIsGrow(true);
             }
         }
-        return (List<Plant>) plantRepository.saveAll(plantList);
+
+        List<Plant> plants = (List<Plant>) plantRepository.saveAll(plantList);
+
+        plants.forEach(plant -> {
+            ZonedDateTime plantZonedDateTime = plant.getDateTime().atZone(ZoneId.of("UTC")).withZoneSameInstant(clientZoneId);
+            ZonedDateTime plantActualTimeToGrowZonedDateTime = plant.getActualTimeToGrow().atZone(ZoneId.of("UTC")).withZoneSameInstant(clientZoneId);
+            plant.setDateTime(plantZonedDateTime.toLocalDateTime());
+            plant.setActualTimeToGrow(plantActualTimeToGrowZonedDateTime.toLocalDateTime());
+        });
+        return plants;
     }
 
     public List<Plant> growPlant(Plant plant, long id, String timezone) {
@@ -61,9 +66,16 @@ public class PlantService {
         return (List<Plant>) plantRepository.saveAll(plantList);
     }
 
-    public Plant createPlant(Plant plant, String timezone) {
-        plant.setDateTime(DateTimeUtils.justifyDateForClient(plant.getDateTime(), timezone));
-        plant.setActualTimeToGrow(plant.getDateTime().plusSeconds(plant.getTimeToGrow()));
+    public Plant createPlant(Plant plant, long userId) {
+        ZonedDateTime utcNow = ZonedDateTime.now(ZoneId.of("UTC"));
+        ZonedDateTime utcActualTimeToGrow = utcNow.plusSeconds(10);
+        plant.setDateTime(utcNow.toLocalDateTime());
+        plant.setActualTimeToGrow(utcActualTimeToGrow.toLocalDateTime());
+        plant.setUserId(userId);
+        plant.setStageOfGrowing(0);
+        plant.setIsGrow(false);
+        plant.setName(ItemEnum.getNameByType(plant.getPlantType()));
+        plant.setTimeToGrow(10);
 
         try {
             plantRepository.save(plant);

@@ -32,7 +32,7 @@ public class SpinService {
         int i = random.nextInt(wheelPrizes.size());
         WheelPrize wheelPrize = wheelPrizes.get(i);
 
-        switch (wheelPrize.getPrizeType().type) {
+        switch (wheelPrize.getPrizeType().getType()) {
             case 0:
                 account.setCornCount(account.getCornCount() + wheelPrize.getPrizeCount());
                 break;
@@ -48,7 +48,7 @@ public class SpinService {
                 account.setCoins(account.getCoins() + wheelPrize.getPrizeCount());
                 break;
             default:
-                throw new IllegalStateException("Unknown prize type: " + wheelPrize.getPrizeType().type);
+                throw new IllegalStateException("Unknown prize type: " + wheelPrize.getPrizeType().getType());
         }
         depotRepository.save(account);
         return wheelPrize;

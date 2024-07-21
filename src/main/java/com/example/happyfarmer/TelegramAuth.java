@@ -11,7 +11,7 @@ import java.util.TreeMap;
 
 public class TelegramAuth {
 
-    public boolean isValid(String telegramInitData, String botToken) throws Exception {
+    public static boolean isValid(String telegramInitData, String botToken) throws Exception {
         Pair<String, String> result = parseInitData(telegramInitData);
         String hash = result.getFirst();
         String initData = result.getSecond();
@@ -21,7 +21,7 @@ public class TelegramAuth {
         return initDataHash.equals(hash);
     }
 
-    private Pair<String, String> parseInitData(String telegramInitData) throws UnsupportedEncodingException {
+    private static Pair<String, String> parseInitData(String telegramInitData) throws UnsupportedEncodingException {
         Map<String, String> initData = parseQueryString(telegramInitData);
         initData = sortMap(initData);
         String hash = initData.remove("hash");
@@ -32,7 +32,7 @@ public class TelegramAuth {
         return new Pair<>(hash, String.join("\n", separatedData));
     }
 
-    private Map<String, String> parseQueryString(String queryString) throws UnsupportedEncodingException {
+    private static Map<String, String> parseQueryString(String queryString) throws UnsupportedEncodingException {
         Map<String, String> parameters = new TreeMap<>();
         String[] pairs = queryString.split("&");
         for (String pair : pairs) {
@@ -44,7 +44,7 @@ public class TelegramAuth {
         return parameters;
     }
 
-    private Map<String, String> sortMap(Map<String, String> map) {
+    private static Map<String, String> sortMap(Map<String, String> map) {
         return new TreeMap<>(map);
     }
 

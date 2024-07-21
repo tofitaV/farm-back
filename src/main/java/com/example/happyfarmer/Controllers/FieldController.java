@@ -26,8 +26,8 @@ public class FieldController {
     }
 
     @PostMapping("/plant")
-    public Plant createPlant(@RequestBody Plant plant, @RequestHeader("Time-Zone") String timezone) {
-        return plantService.createPlant(plant, timezone);
+    public Plant createPlant(@RequestBody Plant plant, @RequestHeader("id") long userId) {
+        return plantService.createPlant(plant, userId);
     }
 
     @PostMapping("/plant-stage")
