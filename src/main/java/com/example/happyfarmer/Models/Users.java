@@ -3,6 +3,8 @@ package com.example.happyfarmer.Models;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
+
 @Data
 @Builder
 @Entity
@@ -19,4 +21,7 @@ public class Users {
     long telegramId;
     String referralCode;
     String referredBy;
+    int availableSpins = 0;
+    @OneToMany(mappedBy = "telegramId", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<SpinAttempt> spinAttempts;
 }

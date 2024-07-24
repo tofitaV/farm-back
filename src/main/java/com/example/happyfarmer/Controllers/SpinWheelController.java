@@ -1,15 +1,12 @@
 package com.example.happyfarmer.Controllers;
 
-import com.example.happyfarmer.Models.Account;
+import com.example.happyfarmer.Models.SpinStatus;
 import com.example.happyfarmer.Models.WheelPrize;
-import com.example.happyfarmer.Repositories.DepotRepository;
-import com.example.happyfarmer.Repositories.WheelRepository;
 import com.example.happyfarmer.Services.SpinService;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Random;
 
 @CrossOrigin(maxAge = 3600)
 @Controller
@@ -31,4 +28,12 @@ public class SpinWheelController {
         return spinService.spinRewards();
     }
 
+    @PostMapping("/purchase")
+    public boolean purchaseSpin(@RequestHeader("id") long id) {
+        return spinService.purchaseSpin(id);
+    }
+    @GetMapping("/status")
+    public SpinStatus getSpinStatus(@RequestHeader("id") long id) {
+        return spinService.getSpinStatus(id);
+    }
 }

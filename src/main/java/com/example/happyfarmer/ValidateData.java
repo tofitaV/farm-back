@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import static com.example.happyfarmer.TelegramAuth.isValid;
+
 
 @CrossOrigin(maxAge = 3600)
 @RestController
@@ -32,7 +34,8 @@ public class ValidateData {
         String refCode = initDataUnsafe.getStart_param();
 
         try {
-            if(false){
+
+            if (isValid(telegramUserInfo.getInitData(), BOT_TOKEN)) {
                 TelegramUser telegramUser = initDataUnsafe.getUser();
                 Users user = userRepository.findByTelegramId(telegramUser.getId());
 
@@ -43,14 +46,9 @@ public class ValidateData {
                     Users newUser = createNewUser(telegramUser, refCode);
                     return ResponseEntity.ok(newUser.getTelegramId());
                 }
-            }else {
-                return ResponseEntity.ok(294367378);
-            }
-            /*if (isValid(telegramUserInfo.getInitData(), BOT_TOKEN)) {
-
             } else {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Invalid hash");
-            }*/
+            }
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error occurred: " + e.getMessage());
