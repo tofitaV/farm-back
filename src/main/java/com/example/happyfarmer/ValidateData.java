@@ -34,7 +34,11 @@ public class ValidateData {
         String refCode = initDataUnsafe.getStart_param();
 
         try {
+           /* if(false){
 
+            }else {
+                return ResponseEntity.ok(294367378);
+            }*/
             if (isValid(telegramUserInfo.getInitData(), BOT_TOKEN)) {
                 TelegramUser telegramUser = initDataUnsafe.getUser();
                 Users user = userRepository.findByTelegramId(telegramUser.getId());
